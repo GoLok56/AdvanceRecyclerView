@@ -17,6 +17,9 @@ import com.coba.recyclerviewlanjutan.model.CardModel;
 import java.util.List;
 
 public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private final int CARD_HEADER = 0; 
+    private final int CARD_ITEM = 1;
+    
     Context context;
     List<CardModel> cards;
 
@@ -25,19 +28,39 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.cards = cards;
     }
 
-    @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_row, null);
-        return new CardViewHolder(view);
+    @Override 
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) { 
+        if (viewType == CARD_HEADER) { 
+            View view = LayoutInflater.from(context).inflate(R.layout.item_header, null); 
+            return new CardHeaderViewHolder(view); 
+        } else { 
+            View view = LayoutInflater.from(context).inflate(R.layout.item_row, null); 
+            return new CardViewHolder(view); 
+        } 
     }
 
-    @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        CardModel card = cards.get(position);
+    @Override 
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) { 
+        final int itemType = getItemViewType(position); 
+        CardModel card = cards.get(position); 
 
-        Glide.with(context).load(card.getImageUrl()).into(((CardViewHolder) holder).imageViewPoster);
-        ((CardViewHolder) holder).textViewTitle.setText(card.getName());
-        ((CardViewHolder) holder).textViewRarity.setText(card.getRarity());
+        if (itemType == CARD_HEADER) { 
+            Glide.with(context).load(card.getImageUrl()).into(((CardHeaderViewHolder) holder).imageViewPoster); 
+            ((CardHeaderViewHolder) holder).textViewTitle.setText(card.getName());
+        } else { 
+            Glide.with(context).load(card.getImageUrl()).into(((CardViewHolder) holder).imageViewPoster);
+            ((CardViewHolder) holder).textViewTitle.setText(card.getName());
+            ((CardViewHolder) holder).textViewRarity.setText(card.getRarity());
+        } 
+    }
+
+    @Override 
+    public int getItemViewType(int position) { 
+        if (position == 0) { 
+            return CARD_HEADER; 
+        } else {
+            return CARD_ITEM; 
+        } 
     }
 
     @Override
@@ -67,6 +90,28 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             intent.putExtra("poster", cards.get(getAdapterPosition()).getImageUrl());
             context.startActivity(intent);
         }
+    }
+
+    class CardHeaderViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener { 
+        ImageView imageViewPoster; 
+        TextView textViewTitle; 
+        
+        public CardHeaderViewHolder(View itemView) { 
+            super(itemView); 
+            imageViewPoster = itemView.findViewById(R.id.card_header_imageview_poster); 
+            textViewTitle = itemView.findViewById(R.id.card_header_textview_title); 
+            itemView.setOnClickListener(this); 
+        } 
+        
+        @Override 
+        public void onClick(View view) { 
+            Intent intent = new Intent(context, CardDetailActivity.class); 
+            intent.putExtra("name", cards.get(getAdapterPosition()).getName());
+            intent.putExtra("series", cards.get(getAdapterPosition()).getSeries());
+            intent.putExtra("rarity", cards.get(getAdapterPosition()).getRarity());
+            intent.putExtra("poster", cards.get(getAdapterPosition()).getImageUrl());
+            context.startActivity(intent); 
+        } 
     }
 }
 
